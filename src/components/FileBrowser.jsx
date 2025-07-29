@@ -31,6 +31,8 @@ import VideoFileIcon from '@mui/icons-material/VideoFile';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import { toast } from 'react-toastify';
 import { fileAPI } from '../api/apiService';
+import { renderAsync as renderDocx } from 'docx-preview';
+import * as XLSX from 'xlsx';
 
 // Helper function to get appropriate file icon based on file type
 const getFileIcon = (file) => {
@@ -80,6 +82,8 @@ const FileBrowser = ({ files, folders, isHR, onRefresh }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewType, setPreviewType] = useState("");
+  const [docxHtml, setDocxHtml] = useState("");
+  const [excelHtml, setExcelHtml] = useState("");
   const open = Boolean(anchorEl);
 
   const handleMenuOpen = (event, item, type) => {
@@ -162,12 +166,30 @@ const FileBrowser = ({ files, folders, isHR, onRefresh }) => {
         const { blob, filename } = await fileAPI.download(selectedItem.id, selectedItem);
         const extension = filename.split('.').pop().toLowerCase();
         const mimeType = blob.type;
-        const viewableExtensions = ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'];
-        const viewableMimeTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/gif', 'image/bmp', 'image/webp'];
         const url = window.URL.createObjectURL(blob);
-        if (viewableExtensions.includes(extension) || viewableMimeTypes.includes(mimeType)) {
+        if (["pdf", "png", "jpg", "jpeg", "gif", "bmp", "webp"].includes(extension) || ["application/pdf", "image/png", "image/jpeg", "image/gif", "image/bmp", "image/webp"].includes(mimeType)) {
           setPreviewUrl(url);
           setPreviewType(extension === 'pdf' || mimeType === 'application/pdf' ? 'pdf' : 'image');
+          setPreviewOpen(true);
+        } else if (["doc", "docx"].includes(extension)) {
+          // Word preview
+          const arrayBuffer = await blob.arrayBuffer();
+          const container = document.createElement('div');
+          await renderDocx(arrayBuffer, container);
+          setDocxHtml(container.innerHTML);
+          setPreviewType('docx');
+          setPreviewOpen(true);
+        } else if (["xls", "xlsx"].includes(extension)) {
+          // Excel preview
+          const arrayBuffer = await blob.arrayBuffer();
+          const workbook = XLSX.read(arrayBuffer, { type: "array" });
+          let html = "";
+          workbook.SheetNames.forEach((sheetName) => {
+            html += `<h4>${sheetName}</h4>`;
+            html += XLSX.utils.sheet_to_html(workbook.Sheets[sheetName]);
+          });
+          setExcelHtml(html);
+          setPreviewType('excel');
           setPreviewOpen(true);
         } else {
           // Fallback: download if not viewable
@@ -395,7 +417,7 @@ const FileBrowser = ({ files, folders, isHR, onRefresh }) => {
         </DialogActions>
       </Dialog>
 
-      {/* Preview Modal for images and PDFs */}
+      {/* Preview Modal for images, PDFs, Word, and Excel */}
       <Dialog
         open={previewOpen}
         onClose={() => setPreviewOpen(false)}
@@ -404,18 +426,22 @@ const FileBrowser = ({ files, folders, isHR, onRefresh }) => {
         PaperProps={{
           sx: {
             m: { xs: 1, sm: 2 },
-            width: { xs: '100%', sm: 600 },
+            width: { xs: '100%', sm: 1200 },
             maxWidth: '100vw',
           }
         }}
       >
         <DialogTitle sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>File Preview</DialogTitle>
-        <DialogContent sx={{ textAlign: 'center', p: { xs: 1, sm: 2 } }}>
+        <DialogContent sx={{ textAlign: 'center', p: { xs: 1, sm: 2 }, maxHeight: 500, overflowY: 'auto' }}>
           {previewType === 'pdf' ? (
-            <iframe src={previewUrl} title="PDF Preview" width="100%" height="300px" style={{ border: 'none' }} />
-          ) : (
-            <img src={previewUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px' }} />
-          )}
+            <iframe src={previewUrl} title="PDF Preview" width="100%" height="400px" style={{ border: 'none' }} />
+          ) : previewType === 'image' ? (
+            <img src={previewUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '400px' }} />
+          ) : previewType === 'docx' ? (
+            <div dangerouslySetInnerHTML={{ __html: docxHtml }} style={{ width: '100%', background: '#fff', padding: 8 }} />
+          ) : previewType === 'excel' ? (
+            <div dangerouslySetInnerHTML={{ __html: excelHtml }} style={{ width: '100%', background: '#fff', padding: 8 }} />
+          ) : null}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPreviewOpen(false)} color="primary" sx={{ fontSize: { xs: '0.95rem', sm: '1rem' } }}>Close</Button>

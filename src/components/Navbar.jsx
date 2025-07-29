@@ -14,16 +14,38 @@ const Navbar = ({ isHR }) => {
 
   return (
     <AppBar 
-      position="fixed" // Changed from 'static' to 'fixed'
+      position="fixed"
       sx={{ 
         backgroundColor: '#181344',
-        zIndex: (theme) => theme.zIndex.drawer + 1 // Ensure it stays above other elements
+        zIndex: (theme) => theme.zIndex.drawer + 1
       }}
     >
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1, color: '#ffffff' }}>
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{ flexGrow: 1, color: '#ffffff', cursor: 'pointer' }}
+          onClick={() => navigate('/')}
+        >
           Thrive Holdings HR Intranet {isHR && '(Admin)'}
         </Typography>
+        {isHR && (
+          <Button
+            onClick={() => navigate('/admin')}
+            sx={{
+              color: '#fff',
+              backgroundColor: '#1976d2',
+              '&:hover': { backgroundColor: '#115293' },
+              fontWeight: 600,
+              borderRadius: 2,
+              px: 2,
+              py: 1,
+              mr: 2
+            }}
+          >
+            Admin Panel
+          </Button>
+        )}
         <Button 
           onClick={handleLogout}
           sx={{ 

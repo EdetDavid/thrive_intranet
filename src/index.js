@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
+import AdminPanel from './pages/AdminPanel';
 import ErrorBoundary from './components/ErrorBoundary';
 
 const router = createBrowserRouter([
@@ -14,6 +15,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Dashboard /> },
       { path: 'login', element: <LoginPage /> },
+      { path: 'admin', element: <AdminPanel /> },
     ],
   },
 ], {

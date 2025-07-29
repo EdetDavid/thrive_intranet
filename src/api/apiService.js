@@ -3,7 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "https://thrive-intranet-hr-backend.onrender.com/api",
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:8000/api",
   timeout: 10000,
 });
 
@@ -116,46 +116,6 @@ export const authAPI = {
   getUserInfo: () => api.get("/user/role/").then((res) => res.data),
 };
 
-// File API
-// export const fileAPI = {
-//   list: (folderId) =>
-//     api
-//       .get("/files/", { params: { folder: folderId } })
-//       .then((res) => {
-//         // Handle both array and paginated responses
-//         if (Array.isArray(res.data)) {
-//           return res.data;
-//         }
-//         return res.data?.results || [];
-//       })
-//       .catch((error) => {
-//         console.error("Error fetching files:", error);
-//         return [];
-//       }),
-
-//   listFolders: (parentId) =>
-//     api
-//       .get("/files/folders/", { params: { parent: parentId } })
-//       .then((res) =>
-//         Array.isArray(res.data) ? res.data : res.data?.results || []
-//       )
-//       .catch(() => []),
-
-//   createFolder: (folderData) => api.post("/files/folders/", folderData),
-
-//   download: (
-
-//   delete: (id) => api.delete(`/files/${id}/`),
-
-//   upload: (formData, config) => {
-//     return api.post("/files/upload/", formData, {
-//       headers: {
-//         "Content-Type": "multipart/form-data",
-//       },
-//       ...config,
-//     });
-//   },
-// };
 export const fileAPI = {
   list: async (folderId) => {
     try {
@@ -277,5 +237,16 @@ export const fileAPI = {
   },
 };
 
-// Add this at the bottom of apiService.js
+// User API for admin panel
+export const userAPI = {
+  list: async () => {
+    const response = await api.get("/user/list/");
+    return response.data;
+  },
+  updateHR: async (userId, isHR) => {
+    const response = await api.patch(`/user/${userId}/hr/`, { is_hr: isHR });
+    return response.data;
+  },
+};
+
 export { api, tokenService };

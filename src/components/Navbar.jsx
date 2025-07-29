@@ -2,6 +2,7 @@ import { AppBar, Toolbar, Typography, Button, IconButton, Drawer, List, ListItem
 import { useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate, useOutletContext } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const Navbar = ({ isHR }) => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const Navbar = ({ isHR }) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     setUser({ isHR: false, isAuthenticated: false });
+    toast.success('Logged out successfully');
     navigate('/login', { replace: true });
   };
 

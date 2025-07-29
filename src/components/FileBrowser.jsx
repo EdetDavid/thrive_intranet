@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import { Worker, Viewer } from '@react-pdf-viewer/core';
+import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
+import '@react-pdf-viewer/core/lib/styles/index.css';
+import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import {
   Grid,
   Card,
@@ -84,6 +88,7 @@ const FileBrowser = ({ files, folders, isHR, onRefresh }) => {
   const [previewType, setPreviewType] = useState("");
   const [docxHtml, setDocxHtml] = useState("");
   const [excelHtml, setExcelHtml] = useState("");
+  const pdfPlugin = defaultLayoutPlugin();
   const open = Boolean(anchorEl);
 
   const handleMenuOpen = (event, item, type) => {
@@ -432,15 +437,67 @@ const FileBrowser = ({ files, folders, isHR, onRefresh }) => {
         }}
       >
         <DialogTitle sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>File Preview</DialogTitle>
-        <DialogContent sx={{ textAlign: 'center', p: { xs: 1, sm: 2 }, maxHeight: 500, overflowY: 'auto' }}>
+        <DialogContent sx={{ textAlign: 'center', p: { xs: 1, sm: 2 }, maxHeight: { xs: 400, sm: 500 }, overflowY: 'auto' }}>
           {previewType === 'pdf' ? (
-            <iframe src={previewUrl} title="PDF Preview" width="100%" height="400px" style={{ border: 'none' }} />
+            <Box sx={{ width: '100%', height: { xs: 350, sm: 400 }, minHeight: 250 }}>
+              <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
+                <Viewer fileUrl={previewUrl} plugins={[pdfPlugin]} />
+              </Worker>
+            </Box>
           ) : previewType === 'image' ? (
             <img src={previewUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '400px' }} />
           ) : previewType === 'docx' ? (
-            <div dangerouslySetInnerHTML={{ __html: docxHtml }} style={{ width: '100%', background: '#fff', padding: 8 }} />
+            <Box
+              sx={{
+                width: '100%',
+                background: '#fff',
+                p: 1,
+                overflowX: 'auto',
+                maxHeight: { xs: 350, sm: 500 },
+                borderRadius: 1,
+                boxShadow: 1,
+                fontSize: { xs: '0.95rem', sm: '1.05rem' },
+                '& table': {
+                  width: '100%',
+                  fontSize: { xs: '0.85rem', sm: '1rem' },
+                  overflowX: 'auto',
+                  display: 'block',
+                },
+                '& h4': {
+                  fontSize: { xs: '1rem', sm: '1.15rem' },
+                  marginTop: 2,
+                  marginBottom: 1,
+                },
+              }}
+            >
+              <div dangerouslySetInnerHTML={{ __html: docxHtml }} />
+            </Box>
           ) : previewType === 'excel' ? (
-            <div dangerouslySetInnerHTML={{ __html: excelHtml }} style={{ width: '100%', background: '#fff', padding: 8 }} />
+            <Box
+              sx={{
+                width: '100%',
+                background: '#fff',
+                p: 1,
+                overflowX: 'auto',
+                maxHeight: { xs: 350, sm: 500 },
+                borderRadius: 1,
+                boxShadow: 1,
+                fontSize: { xs: '0.95rem', sm: '1.05rem' },
+                '& table': {
+                  width: '100%',
+                  fontSize: { xs: '0.85rem', sm: '1rem' },
+                  overflowX: 'auto',
+                  display: 'block',
+                },
+                '& h4': {
+                  fontSize: { xs: '1rem', sm: '1.15rem' },
+                  marginTop: 2,
+                  marginBottom: 1,
+                },
+              }}
+            >
+              <div dangerouslySetInnerHTML={{ __html: excelHtml }} />
+            </Box>
           ) : null}
         </DialogContent>
         <DialogActions>

@@ -50,7 +50,7 @@ const LoginPage = () => {
         isHR: userInfo?.is_hr || false,
         isAuthenticated: true,
       });
-
+      toast.success("Login successful! Welcome to Thrive HR Intranet.");
       navigate("/");
     } catch (error) {
       toast.error(

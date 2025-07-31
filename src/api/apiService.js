@@ -3,7 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "https://thrive-intranet-hr-backend.onrender.com/api",
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:8000/api",
   timeout: 10000,
 });
 
@@ -241,12 +241,13 @@ export const fileAPI = {
 export const userAPI = {
   list: async () => {
     const response = await api.get("/user/list/");
-    return response.data;
+    // The response will now be a direct array since pagination is disabled
+    return { results: response.data };
   },
   updateHR: async (userId, isHR) => {
     const response = await api.patch(`/user/${userId}/hr/`, { is_hr: isHR });
     return response.data;
   },
-};
+}
 
 export { api, tokenService };

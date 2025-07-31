@@ -23,19 +23,19 @@ import Navbar from "../components/Navbar";
 
 const AdminPanel = () => {
   const [users, setUsers] = useState([]);
-  const isMobile = useMediaQuery('(max-width:600px)');
+  const isMobile = useMediaQuery('(max-width:768px)');
+  const isSmallScreen = useMediaQuery('(max-width:1024px)');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchUsers = async () => {
+  const fetchAllUsers = async () => {
     setLoading(true);
     setError("");
     try {
       const response = await userAPI.list();
-      // Handle paginated or direct array response
-      const userList = Array.isArray(response) ? response : response.results || [];
-      setUsers(userList);
+      setUsers(Array.isArray(response) ? response : response.results || []);
     } catch (err) {
+      console.error('Error fetching users:', err);
       setError("Failed to fetch users");
       setUsers([]);
     } finally {
@@ -44,53 +44,104 @@ const AdminPanel = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchAllUsers();
   }, []);
 
   const handleHRChange = async (userId, isHR) => {
     try {
-      await userAPI.updateHR(userId, isHR);
-      toast.success("HR privilege updated");
+      const response = await userAPI.updateHR(userId, isHR);
+      toast.success(response.detail || "HR privilege updated");
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === userId ? { ...user, is_hr: isHR } : user
         )
       );
     } catch (err) {
-      toast.error("Failed to update HR privilege");
+      console.error('Error updating HR privilege:', err);
+      toast.error(err.response?.data?.detail || "Failed to update HR privilege");
     }
   };
 
   return (
     <>
       <Navbar isHR={true} />
-      <Container maxWidth="md" sx={{ mt: { xs: 7, sm: 10 }, px: { xs: 0.5, sm: 2 } }}>
-        <Typography variant="h4" gutterBottom>
-          Admin Panel
-        </Typography>
+      <Container maxWidth="lg" sx={{ 
+        mt: { xs: 7, sm: 10 }, 
+        px: { xs: 1, sm: 2, md: 3 },
+        maxWidth: { xl: '1400px' }
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          mb: 3
+        }}>
+          <Typography variant="h4" component="h1" sx={{
+            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.25rem' }
+          }}>
+            Admin Panel
+          </Typography>
+        </Box>
         {loading ? (
           <CircularProgress />
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : isMobile ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: { 
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(2, 1fr)'
+            },
+            gap: { xs: 2, sm: 3 }
+          }}>
             {users.map((user) => (
-              <Card key={user.id} sx={{ mb: 2, boxShadow: 2 }}>
-                <CardContent>
-                  <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+              <Card key={user.id} sx={{ 
+                boxShadow: 2,
+                '&:hover': {
+                  boxShadow: 4,
+                  transform: 'translateY(-2px)',
+                  transition: 'all 0.2s'
+                }
+              }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                  <Typography variant="h6" gutterBottom sx={{ 
+                    fontSize: { xs: '1rem', sm: '1.1rem' },
+                    fontWeight: 600 
+                  }}>
                     {user.username}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Email: {user.email}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    First Name: {user.first_name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Last Name: {user.last_name}
-                  </Typography>
-                  <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="body2">HR Privilege:</Typography>
+                  <Box sx={{ display: 'grid', gap: 1 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ 
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      <strong>Email:</strong>&nbsp;{user.email}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      <strong>First Name:</strong>&nbsp;{user.first_name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      <strong>Last Name:</strong>&nbsp;{user.last_name}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ 
+                    mt: 2, 
+                    pt: 2, 
+                    borderTop: '1px solid',
+                    borderColor: 'divider',
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between'
+                  }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>HR Privilege</Typography>
                     <Switch
                       checked={user.is_hr}
                       onChange={(e) => handleHRChange(user.id, e.target.checked)}
@@ -102,38 +153,71 @@ const AdminPanel = () => {
             ))}
           </Box>
         ) : (
-          <TableContainer component={Paper} sx={{ width: '100%', overflowX: 'auto' }}>
-            <Table size="small" sx={{ minWidth: 500 }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ minWidth: 120 }}>Username</TableCell>
-                  <TableCell sx={{ minWidth: 160 }}>Email</TableCell>
-                  <TableCell sx={{ minWidth: 100 }}>First Name</TableCell>
-                  <TableCell sx={{ minWidth: 100 }}>Last Name</TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>HR Privilege</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.first_name}</TableCell>
-                    <TableCell>{user.last_name}</TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={user.is_hr}
-                        onChange={(e) =>
-                          handleHRChange(user.id, e.target.checked)
-                        }
-                        color="primary"
-                      />
+          <Paper sx={{ 
+            width: '100%', 
+            overflow: 'hidden',
+            boxShadow: 2,
+            '& .MuiTableCell-root': {
+              px: { xs: 1, sm: 2, md: 3 },
+              py: { xs: 1.5, sm: 2 },
+              '&:first-of-type': {
+                pl: { xs: 2, sm: 3 }
+              },
+              '&:last-of-type': {
+                pr: { xs: 2, sm: 3 }
+              }
+            }
+          }}>
+            <TableContainer sx={{ maxHeight: '70vh' }}>
+              <Table stickyHeader sx={{ minWidth: 700 }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600, backgroundColor: 'background.paper' }}>
+                      Username
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600, backgroundColor: 'background.paper' }}>
+                      Email
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600, backgroundColor: 'background.paper' }}>
+                      First Name
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600, backgroundColor: 'background.paper' }}>
+                      Last Name
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600, backgroundColor: 'background.paper' }}>
+                      HR Privilege
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow 
+                      key={user.id}
+                      hover
+                      sx={{
+                        '&:last-child td, &:last-child th': { border: 0 },
+                        transition: 'background-color 0.2s',
+                      }}
+                    >
+                      <TableCell component="th" scope="row">
+                        {user.username}
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.first_name}</TableCell>
+                      <TableCell>{user.last_name}</TableCell>
+                      <TableCell>
+                        <Switch
+                          checked={user.is_hr}
+                          onChange={(e) => handleHRChange(user.id, e.target.checked)}
+                          color="primary"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
         )}
       </Container>
     </>

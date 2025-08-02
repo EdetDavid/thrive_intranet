@@ -3,7 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "https://thrive-intranet-hr-backend.onrender.com/api",
+  baseURL: process.env.REACT_APP_API_URL || "https://dvooskid.pythonanywhere.com/api",
   timeout: 10000,
 });
 

@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || "https://dvooskid.pythonanywhere.com/api",
-  timeout: 10000,
+  // timeout: 10000,
 });
 
 // Token management

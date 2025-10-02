@@ -166,10 +166,25 @@ export const fileAPI = {
       const response = await api.get(`/files/files/${id}/download/`, {
         responseType: "blob",
       });
-      let filename = response.headers["content-disposition"]?.split("filename=")[1]?.replace(/"/g, "");
-      if (!filename && fileObj && fileObj.name) {
-        filename = fileObj.name;
+      // Robust filename parsing (handles filename*=UTF-8''... and filename="..." patterns)
+      const contentDisp = response.headers["content-disposition"] || "";
+      let filename = null;
+      try {
+        // Try filename* first (RFC5987)
+        const fnStarMatch = contentDisp.match(/filename\*=(?:UTF-8'')?([^;\n\r]+)/i);
+        if (fnStarMatch && fnStarMatch[1]) {
+          filename = decodeURIComponent(fnStarMatch[1].trim().replace(/^"|"$/g, ""));
+        } else {
+          const fnMatch = contentDisp.match(/filename=(?:"([^"]+)")|filename=([^;\n\r]+)/i);
+          if (fnMatch) {
+            filename = (fnMatch[1] || fnMatch[2] || "").trim().replace(/^"|"$/g, "");
+          }
+        }
+      } catch (e) {
+        filename = null;
       }
+
+      if (!filename && fileObj && fileObj.name) filename = fileObj.name;
       filename = filename || `file-${id}`;
       return { blob: response.data, filename };
     } catch (error) {
@@ -228,7 +243,19 @@ export const fileAPI = {
       const response = await api.get(`/files/folders/${folderId}/download_zip/`, {
         responseType: "blob",
       });
-      let filename = response.headers["content-disposition"]?.split("filename=")[1]?.replace(/"/g, "");
+      const contentDisp = response.headers["content-disposition"] || "";
+      let filename = null;
+      try {
+        const fnStarMatch = contentDisp.match(/filename\*=(?:UTF-8'')?([^;\n\r]+)/i);
+        if (fnStarMatch && fnStarMatch[1]) {
+          filename = decodeURIComponent(fnStarMatch[1].trim().replace(/^"|"$/g, ""));
+        } else {
+          const fnMatch = contentDisp.match(/filename=(?:"([^"]+)")|filename=([^;\n\r]+)/i);
+          if (fnMatch) filename = (fnMatch[1] || fnMatch[2] || "").trim().replace(/^"|"$/g, "");
+        }
+      } catch (e) {
+        filename = null;
+      }
       filename = filename || `folder-${folderId}.zip`;
       return { blob: response.data, filename };
     } catch (error) {

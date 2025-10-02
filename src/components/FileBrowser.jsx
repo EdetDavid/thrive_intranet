@@ -1,9 +1,5 @@
 import React, { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import { Worker, Viewer } from "@react-pdf-viewer/core";
-import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
-import "@react-pdf-viewer/core/lib/styles/index.css";
-import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import {
   Grid,
   Card,
@@ -112,14 +108,13 @@ const FileBrowser = ({ files, folders, isHR, onRefresh }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewType, setPreviewType] = useState(""); // 'pdf' | 'image' | 'docx' | 'excel'
-  const [pdfData, setPdfData] = useState(null);
   const [docxHtml, setDocxHtml] = useState("");
   const [excelHtml, setExcelHtml] = useState("");
   const [loadingPreview, setLoadingPreview] = useState(false); // NEW: loading state for preview
   const [pdfPage, setPdfPage] = useState(1);
   const [pdfNumPages, setPdfNumPages] = useState(null);
 
-  const pdfPlugin = defaultLayoutPlugin();
+  // pdf plugin removed because we're using react-pdf Document/Page for previews
   const open = Boolean(anchorEl);
 
   const handleMenuOpen = (event, item, type) => {
@@ -136,7 +131,6 @@ const FileBrowser = ({ files, folders, isHR, onRefresh }) => {
     setPreviewOpen(false);
     setPreviewUrl("");
     setPreviewType("");
-    setPdfData(null);
     setDocxHtml("");
     setExcelHtml("");
     setPdfPage(1);
@@ -235,18 +229,47 @@ const FileBrowser = ({ files, folders, isHR, onRefresh }) => {
         mime === "application/pdf" ||
         (await isPdfBlob(blob))
       ) {
+        // Open a blank window synchronously to avoid popup blockers.
+        const newWindow = window.open("", "_blank");
         try {
           const url = window.URL.createObjectURL(blob);
-          window.open(url, "_blank");
-          // Revoke after a short delay so the new tab can load the resource
-          setTimeout(() => {
+          if (!newWindow) {
+            // Popup blocked — try anchor trick to open in new tab
             try {
-              window.URL.revokeObjectURL(url);
-            } catch {}
-          }, 5000);
+              const a = document.createElement('a');
+              a.href = url;
+              a.target = '_blank';
+              a.rel = 'noopener noreferrer';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+            } catch (e) {
+              // Fallback to in-app preview using dialog
+              setPreviewUrl(url);
+              setPreviewType("pdf");
+              setPreviewOpen(true);
+            }
+          } else {
+            // Set location of the previously opened window to the blob URL
+            try {
+              newWindow.location = url;
+            } catch (err) {
+              // Some browsers may restrict setting location; fallback to preview
+              setPreviewUrl(url);
+              setPreviewType("pdf");
+              setPreviewOpen(true);
+            }
+            // Schedule revoke after a delay so the new tab can load the resource
+            setTimeout(() => {
+              try {
+                window.URL.revokeObjectURL(url);
+              } catch {}
+            }, 10000);
+          }
         } catch (e) {
           console.error(e);
           toast.error("Failed to open PDF in browser");
+          if (newWindow) try { newWindow.close(); } catch {}
         } finally {
           setLoadingPreview(false);
         }

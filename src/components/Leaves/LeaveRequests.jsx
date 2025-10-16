@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import { authAPI, userAPI } from '../../api/apiService';
 import ApproveIcon from '@mui/icons-material/CheckCircleOutline';
 import RejectIcon from '@mui/icons-material/CancelOutlined';
+import AddIcon from '@mui/icons-material/Add';
+import HRLeaveForm from './HRLeaveForm';
 import { useNavigate } from 'react-router-dom';
 
 const LeaveRequests = () => {
@@ -19,6 +21,7 @@ const LeaveRequests = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [isHR, setIsHR] = useState(false);
   const [isLineManager, setIsLineManager] = useState(false);
+  const [createLeaveOpen, setCreateLeaveOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -144,7 +147,19 @@ const LeaveRequests = () => {
 
   return (
     <Box>
-      <Typography variant="h6" sx={{ mb: 2 }}>Leave Requests</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">Leave Requests</Typography>
+        {isHR && (
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateLeaveOpen(true)}
+          >
+            Create Staff Leave
+          </Button>
+        )}
+      </Box>
       {loading && <Typography>Loading...</Typography>}
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: 2 }}>
@@ -224,6 +239,14 @@ const LeaveRequests = () => {
           <Button color={confirmAction === 'approve' ? 'success' : 'error'} variant="contained" onClick={performConfirm}>{confirmAction === 'approve' ? 'Approve' : 'Reject'}</Button>
         </DialogActions>
       </Dialog>
+
+      {/* HR Create Leave Form */}
+      <HRLeaveForm
+        open={createLeaveOpen}
+        onClose={() => setCreateLeaveOpen(false)}
+        onSuccess={load}
+        users={allUsers}
+      />
     </Box>
   );
 };

@@ -9,6 +9,8 @@ import { authAPI } from './api/apiService';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/Navbar';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const theme = createTheme({
   palette: {
@@ -73,28 +75,30 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      {/* Don't show Navbar on the login page */}
-      {location.pathname !== '/login' && (
-        <>
-          <Navbar isHR={user.isHR} setUser={setUser} />
-          {/* Toolbar provides consistent spacing for the fixed AppBar so content isn't covered */}
-          <Toolbar />
-        </>
-      )}
-      <ToastContainer
-        position="top-right"
-        autoClose={4000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
-  <Outlet context={{ user, setUser }} />
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <CssBaseline />
+        {/* Don't show Navbar on the login page */}
+        {location.pathname !== '/login' && (
+          <>
+            <Navbar isHR={user.isHR} setUser={setUser} />
+            {/* Toolbar provides consistent spacing for the fixed AppBar so content isn't covered */}
+            <Toolbar />
+          </>
+        )}
+        <ToastContainer
+          position="top-right"
+          autoClose={4000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
+        <Outlet context={{ user, setUser }} />
+      </LocalizationProvider>
     </ThemeProvider>
   );
 };

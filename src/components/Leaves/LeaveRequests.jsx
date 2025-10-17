@@ -24,7 +24,7 @@ const LeaveRequests = () => {
   const [createLeaveOpen, setCreateLeaveOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useMediaQuery('(max-width:600px)');
+  const isMobile = useMediaQuery('(max-width:600px)'); 
 
   const load = async () => {
     setLoading(true);
@@ -188,7 +188,12 @@ const LeaveRequests = () => {
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Box>
                     <Typography sx={{ fontWeight: 700 }}>{user?.username}</Typography>
-                    <Typography variant="body2" color="text.secondary">{user?.first_name} {user?.last_name} • {user?.email}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {user?.first_name} {user?.last_name} • {user?.email}
+                      {user?.manager && (
+                        <span> • Manager: {user.manager.username}</span>
+                      )}
+                    </Typography>
                   </Box>
                   <Box>
                     <Chip label={`${userRequests.length} request(s)`} />
@@ -200,9 +205,35 @@ const LeaveRequests = () => {
                   <Paper key={r.id} sx={{ p: 1, mb: 1 }} variant="outlined">
                     <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center">
                       <Box sx={{ mb: { xs: 1, sm: 0 } }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{r.leave_type} • {r.start_date} → {r.end_date}</Typography>
-                        <Typography variant="body2" color="text.secondary">{r.reason}</Typography>
-                        <Typography variant="caption" color="text.secondary">Status: <strong>{r.status}</strong></Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {r.leave_type} Leave Request
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Duration: {r.start_date} → {r.end_date}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Email: {r.user?.email || r.user?.username}
+                        </Typography>
+                        {r.reason && (
+                          <Typography variant="body2" color="text.secondary">
+                            Reason: {r.reason}
+                          </Typography>
+                        )}
+                        <Typography variant="caption" sx={{ 
+                          display: 'inline-block',
+                          px: 1,
+                          py: 0.5,
+                          borderRadius: 1,
+                          bgcolor: r.status === 'approved' ? 'success.light' : 
+                                  r.status === 'rejected' ? 'error.light' : 
+                                  'warning.light',
+                          color: r.status === 'approved' ? 'success.dark' :
+                                r.status === 'rejected' ? 'error.dark' :
+                                'warning.dark',
+                          mt: 1
+                        }}>
+                          Status: <strong>{r.status.toUpperCase()}</strong>
+                        </Typography>
                       </Box>
                       <Box>
                         {canActOn(r) ? (
@@ -232,7 +263,7 @@ const LeaveRequests = () => {
       <Dialog open={confirmOpen} onClose={closeConfirm}>
         <DialogTitle>{confirmAction === 'approve' ? 'Confirm Approval' : 'Confirm Rejection'}</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to {confirmAction} the leave request for <strong>{confirmRequest?.user?.username}</strong> ({confirmRequest?.start_date} → {confirmRequest?.end_date})?</Typography>
+         <Typography>Are you sure you want to {confirmAction} the leave request for <strong>{confirmRequest?.user?.username}</strong> ({confirmRequest?.start_date} → {confirmRequest?.end_date})?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={closeConfirm}>Cancel</Button>

@@ -38,7 +38,7 @@ const HRLeaveForm = ({ open, onClose, onSuccess, users }) => {
     setLoading(true);
     try {
       await leaveAPI.create({
-        user: selectedUser,
+        user_id: selectedUser,
         start_date: startDate.toISOString().split('T')[0],
         end_date: endDate.toISOString().split('T')[0],
         leave_type: leaveType,

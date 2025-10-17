@@ -3,8 +3,8 @@ import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 
 const api = axios.create({
-  // baseURL: process.env.REACT_APP_API_URL || "https://dvooskid.pythonanywhere.com/api",
-  baseURL: process.env.REACT_APP_API_URL || "http://localhost:8000/api",
+  baseURL: process.env.REACT_APP_API_URL || "https://dvooskid.pythonanywhere.com/api",
+  // baseURL: process.env.REACT_APP_API_URL || "http://localhost:8000/api",
   // timeout: 10000,
 });
 

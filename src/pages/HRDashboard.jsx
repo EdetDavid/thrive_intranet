@@ -14,8 +14,10 @@ const HRDashboard = () => {
     setLoading(true);
     try {
       const data = await leaveAPI.list();
+      console.log('Leave API response:', data);  // Debug log
       // ensure array
       const list = Array.isArray(data) ? data : data.results || [];
+      console.log('Processed leaves:', list);    // Debug log
       setLeaves(list);
     } catch (err) {
       console.error('Failed to fetch leaves', err);
@@ -57,7 +59,7 @@ const HRDashboard = () => {
       if (isWithinInterval(d, { start: s, end: e })) {
         const key = format(d, 'yyyy-MM-dd');
         leavesByDate[key] = leavesByDate[key] || [];
-        leavesByDate[key].push(l.user_detail?.username || l.user_detail?.first_name || l.user_detail?.email || 'Unknown');
+            leavesByDate[key].push(l.user?.username || l.user?.first_name || l.user?.email || 'Unknown');
       }
     });
   });
@@ -99,7 +101,7 @@ const HRDashboard = () => {
                 <TableBody>
                   {pending.map(p => (
                     <TableRow key={p.id}>
-                      <TableCell>{(p.user_detail?.username || p.user_detail?.first_name || p.user_detail?.email || 'Unknown')}</TableCell>
+                      <TableCell>{(p.user?.username || p.user?.first_name || p.user?.email || 'Unknown')}</TableCell>
                       <TableCell>{p.leave_type}</TableCell>
                       <TableCell>{p.start_date}</TableCell>
                       <TableCell>{p.end_date}</TableCell>

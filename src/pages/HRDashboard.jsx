@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody, Button, Grid, Chip, TextField } from '@mui/material';
+import { Box, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody, Button, Grid, Chip, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { toast } from 'react-toastify';
 import { leaveAPI } from '../api/apiService';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from 'date-fns';
 
@@ -9,6 +10,11 @@ const HRDashboard = () => {
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [isHR, setIsHR] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [pwSaving, setPwSaving] = useState(false);
 
   const fetchLeaves = async () => {
     setLoading(true);
@@ -28,6 +34,20 @@ const HRDashboard = () => {
   };
 
   useEffect(() => { fetchLeaves(); }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const info = await import('../api/apiService').then(m => m.authAPI.getUserInfo());
+        if (!mounted) return;
+        setIsHR(!!info?.is_hr);
+      } catch (e) {
+        // ignore
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   const handleApprove = async (id) => {
     try { await leaveAPI.approve(id); fetchLeaves(); } catch (e) { console.error(e); }
@@ -69,7 +89,7 @@ const HRDashboard = () => {
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>HR Dashboard</Typography>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
             views={["year", "month"]}
@@ -81,6 +101,9 @@ const HRDashboard = () => {
             renderInput={(params) => <TextField {...params} size="small" sx={{ width: 200 }} />}
           />
         </LocalizationProvider>
+        {isHR && (
+          <Button variant="outlined" color="primary" onClick={() => setPwOpen(true)} sx={{ ml: 'auto' }}>Change Password</Button>
+        )}
       </Box>
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
@@ -148,6 +171,44 @@ const HRDashboard = () => {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Change password dialog */}
+      <Dialog open={pwOpen} onClose={() => setPwOpen(false)}>
+        <DialogTitle>Change Password</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Current Password"
+            type="password"
+            fullWidth
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            label="New Password"
+            type="password"
+            fullWidth
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPwOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={async () => {
+            setPwSaving(true);
+            try {
+              const { userAPI } = await import('../api/apiService');
+              await userAPI.changePassword(oldPassword, newPassword);
+              toast.success('Password changed successfully');
+              setPwOpen(false);
+              setOldPassword(''); setNewPassword('');
+            } catch (e) {
+              console.error('Password change failed', e);
+              toast.error(e.response?.data?.detail || e.message || 'Failed to change password');
+            } finally { setPwSaving(false); }
+          }} disabled={pwSaving}>{pwSaving ? 'Saving...' : 'Change'}</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

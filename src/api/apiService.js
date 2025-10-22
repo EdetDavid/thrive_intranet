@@ -331,6 +331,16 @@ export const userAPI = {
       throw error;
     }
   },
+
+  changePassword: async (oldPassword, newPassword) => {
+    try {
+      const response = await api.post('/user/password/', { old_password: oldPassword, new_password: newPassword });
+      return response.data;
+    } catch (error) {
+      console.error('Change password error:', error);
+      throw error;
+    }
+  }
 }
 
 export { api, tokenService };

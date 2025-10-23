@@ -10,6 +10,7 @@ import HRDashboard from './pages/HRDashboard';
 import MyTeam from './pages/MyTeam';
 import SubmitLeavePage from './pages/SubmitLeavePage';
 import ErrorBoundary from './components/ErrorBoundary';
+import ProfilePage from './pages/ProfilePage';
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,8 @@ const router = createBrowserRouter([
   { path: 'submit-leave', element: <SubmitLeavePage /> },
   { path: 'hr', element: <HRDashboard /> },
   { path: 'my-team', element: <MyTeam /> },
+  { path: 'profile', element: <ProfilePage /> },
+  { path: 'profile/:id', element: <ProfilePage /> },
     ],
   },
 ], {

@@ -340,6 +340,17 @@ export const userAPI = {
       console.error('Change password error:', error);
       throw error;
     }
+  },
+  
+  getProfile: async (userId = null) => {
+    try {
+      const url = userId ? `/user/profile/${userId}/` : '/user/profile/';
+      const response = await api.get(url);
+      return response.data;
+    } catch (error) {
+      console.error('Get profile error:', error);
+      throw error;
+    }
   }
 }
 

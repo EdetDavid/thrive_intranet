@@ -123,7 +123,18 @@ const Navbar = ({ isHR, setUser }) => {
                 Leaves
               </Button>
               {username && (
-                <Typography variant="body2" sx={{ color: '#fff', mr: 2, fontWeight: 600, display: { xs: 'none', sm: 'inline' } }}>{username}</Typography>
+                <Button
+                  onClick={() => navigate('/profile')}
+                  sx={{
+                    color: '#fff',
+                    fontWeight: 600,
+                    mr: 2,
+                    display: { xs: 'none', sm: 'flex' },
+                    textTransform: 'none'
+                  }}
+                >
+                  {username}
+                </Button>
               )}
               {username && (
                 <Typography variant="body2" sx={{ color: '#fff', mr: 1, fontWeight: 600, display: { xs: 'inline', sm: 'none' } }}>{username.charAt(0).toUpperCase()}</Typography>
@@ -154,8 +165,8 @@ const Navbar = ({ isHR, setUser }) => {
       >
         <List>
           {username && (
-            <ListItem>
-              <ListItemText primary={username} secondary="You" />
+            <ListItem button onClick={() => { navigate('/profile'); setDrawerOpen(false); }}>
+              <ListItemText primary={username} secondary="View Profile" />
             </ListItem>
           )}
           <ListItem button onClick={() => { navigate('/'); setDrawerOpen(false); }}>

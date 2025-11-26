@@ -54,10 +54,25 @@ const LoginPage = () => {
       toast.success("Login successful! Welcome to Thrive HR Intranet.");
       navigate("/");
     } catch (error) {
-      toast.error(
-        error.response?.data?.detail ||
-          "Login failed. Please check your credentials."
-      );
+      // Derive a helpful error message from server response or error object
+      let message = 'Login failed. Please check your credentials.';
+      if (error?.response?.data) {
+        const data = error.response.data;
+        if (typeof data === 'string') {
+          message = data;
+        } else if (data.detail) {
+          message = data.detail;
+        } else if (typeof data === 'object') {
+          // Pick the first error message from validation object
+          const firstKey = Object.keys(data)[0];
+          const val = data[firstKey];
+          if (Array.isArray(val) && val.length > 0) message = val[0];
+          else if (typeof val === 'string') message = val;
+        }
+      } else if (error?.message) {
+        message = error.message;
+      }
+      toast.error(message);
     } finally {
       setLoading(false);
     }

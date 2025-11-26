@@ -23,6 +23,7 @@ const theme = createTheme({
 const App = () => {
   const [user, setUser] = useState({ isHR: false, isAuthenticated: false });
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -80,7 +81,7 @@ const App = () => {
         {/* Don't show Navbar on the login page */}
         {location.pathname !== '/login' && (
           <>
-            <Navbar isHR={user.isHR} setUser={setUser} />
+            <Navbar isHR={user.isHR} setUser={setUser} setSidebarOpen={setSidebarOpen} />
             {/* Toolbar provides consistent spacing for the fixed AppBar so content isn't covered */}
             <Toolbar />
           </>
@@ -97,7 +98,7 @@ const App = () => {
           pauseOnHover
           theme="colored"
         />
-        <Outlet context={{ user, setUser }} />
+        <Outlet context={{ user, setUser, sidebarOpen, setSidebarOpen }} />
       </LocalizationProvider>
     </ThemeProvider>
   );

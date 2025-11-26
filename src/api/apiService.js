@@ -75,7 +75,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // If the error came from the token endpoints (login/refresh),
+    // don't forcibly redirect to the login page here — let the caller
+    // handle the authentication error so the UI can show toast messages.
+    const url = error?.config?.url || '';
+    const isTokenEndpoint = url.includes('/token/');
+
+    if (error.response?.status === 401 && !isTokenEndpoint) {
       tokenService.clearTokens();
       window.location.href = "/login";
     }
@@ -171,13 +177,21 @@ export const fileAPI = {
       let filename = null;
       try {
         // Try filename* first (RFC5987)
-        const fnStarMatch = contentDisp.match(/filename\*=(?:UTF-8'')?([^;\n\r]+)/i);
+        const fnStarMatch = contentDisp.match(
+          /filename\*=(?:UTF-8'')?([^;\n\r]+)/i
+        );
         if (fnStarMatch && fnStarMatch[1]) {
-          filename = decodeURIComponent(fnStarMatch[1].trim().replace(/^"|"$/g, ""));
+          filename = decodeURIComponent(
+            fnStarMatch[1].trim().replace(/^"|"$/g, "")
+          );
         } else {
-          const fnMatch = contentDisp.match(/filename=(?:"([^"]+)")|filename=([^;\n\r]+)/i);
+          const fnMatch = contentDisp.match(
+            /filename=(?:"([^"]+)")|filename=([^;\n\r]+)/i
+          );
           if (fnMatch) {
-            filename = (fnMatch[1] || fnMatch[2] || "").trim().replace(/^"|"$/g, "");
+            filename = (fnMatch[1] || fnMatch[2] || "")
+              .trim()
+              .replace(/^"|"$/g, "");
           }
         }
       } catch (e) {
@@ -228,10 +242,9 @@ export const fileAPI = {
 
   renameFolder: async (folderId, newName) => {
     try {
-      const response = await api.patch(
-        `/files/folders/${folderId}/rename/`,
-        { name: newName }
-      );
+      const response = await api.patch(`/files/folders/${folderId}/rename/`, {
+        name: newName,
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -240,18 +253,30 @@ export const fileAPI = {
 
   downloadFolderZip: async (folderId) => {
     try {
-      const response = await api.get(`/files/folders/${folderId}/download_zip/`, {
-        responseType: "blob",
-      });
+      const response = await api.get(
+        `/files/folders/${folderId}/download_zip/`,
+        {
+          responseType: "blob",
+        }
+      );
       const contentDisp = response.headers["content-disposition"] || "";
       let filename = null;
       try {
-        const fnStarMatch = contentDisp.match(/filename\*=(?:UTF-8'')?([^;\n\r]+)/i);
+        const fnStarMatch = contentDisp.match(
+          /filename\*=(?:UTF-8'')?([^;\n\r]+)/i
+        );
         if (fnStarMatch && fnStarMatch[1]) {
-          filename = decodeURIComponent(fnStarMatch[1].trim().replace(/^"|"$/g, ""));
+          filename = decodeURIComponent(
+            fnStarMatch[1].trim().replace(/^"|"$/g, "")
+          );
         } else {
-          const fnMatch = contentDisp.match(/filename=(?:"([^"]+)")|filename=([^;\n\r]+)/i);
-          if (fnMatch) filename = (fnMatch[1] || fnMatch[2] || "").trim().replace(/^"|"$/g, "");
+          const fnMatch = contentDisp.match(
+            /filename=(?:"([^"]+)")|filename=([^;\n\r]+)/i
+          );
+          if (fnMatch)
+            filename = (fnMatch[1] || fnMatch[2] || "")
+              .trim()
+              .replace(/^"|"$/g, "");
         }
       } catch (e) {
         filename = null;
@@ -269,11 +294,11 @@ export const leaveAPI = {
   list: async (userId = null) => {
     const params = {};
     if (userId) params.user = userId;
-    const response = await api.get('/leaves/', { params });
+    const response = await api.get("/leaves/", { params });
     return response.data;
   },
   create: async (data) => {
-    const response = await api.post('/leaves/', data);
+    const response = await api.post("/leaves/", data);
     return response.data;
   },
   approve: async (id) => {
@@ -283,8 +308,8 @@ export const leaveAPI = {
   reject: async (id) => {
     const response = await api.post(`/leaves/${id}/reject/`);
     return response.data;
-  }
-}
+  },
+};
 
 // // User API for admin panel
 export const userAPI = {
@@ -294,7 +319,9 @@ export const userAPI = {
     return { results: response.data };
   },
   listByManager: async (managerId) => {
-    const response = await api.get('/user/list/', { params: { manager: managerId } });
+    const response = await api.get("/user/list/", {
+      params: { manager: managerId },
+    });
     return { results: response.data };
   },
   updateHR: async (userId, isHR) => {
@@ -302,15 +329,17 @@ export const userAPI = {
     return response.data;
   },
   updateLineManager: async (userId, isLineManager) => {
-    const response = await api.patch(`/user/${userId}/line-manager/`, { is_line_manager: isLineManager });
+    const response = await api.patch(`/user/${userId}/line-manager/`, {
+      is_line_manager: isLineManager,
+    });
     return response.data;
   },
   createUser: async (userData) => {
     try {
-      const response = await api.post('/user/create/', userData);
+      const response = await api.post("/user/create/", userData);
       return response.data;
     } catch (error) {
-      console.error('Create user error:', error);
+      console.error("Create user error:", error);
       throw error;
     }
   },
@@ -318,40 +347,45 @@ export const userAPI = {
     try {
       await api.delete(`/user/${userId}/`);
     } catch (error) {
-      console.error('Delete user error:', error);
+      console.error("Delete user error:", error);
       throw error;
     }
   },
   setManager: async (userId, managerId) => {
     try {
-      const response = await api.patch(`/user/${userId}/manager/`, { manager: managerId });
+      const response = await api.patch(`/user/${userId}/manager/`, {
+        manager: managerId,
+      });
       return response.data;
     } catch (error) {
-      console.error('Set manager error:', error);
+      console.error("Set manager error:", error);
       throw error;
     }
   },
 
   changePassword: async (oldPassword, newPassword) => {
     try {
-      const response = await api.post('/user/password/', { old_password: oldPassword, new_password: newPassword });
+      const response = await api.post("/user/password/", {
+        old_password: oldPassword,
+        new_password: newPassword,
+      });
       return response.data;
     } catch (error) {
-      console.error('Change password error:', error);
+      console.error("Change password error:", error);
       throw error;
     }
   },
-  
+
   getProfile: async (userId = null) => {
     try {
-      const url = userId ? `/user/profile/${userId}/` : '/user/profile/';
+      const url = userId ? `/user/profile/${userId}/` : "/user/profile/";
       const response = await api.get(url);
       return response.data;
     } catch (error) {
-      console.error('Get profile error:', error);
+      console.error("Get profile error:", error);
       throw error;
     }
-  }
-}
+  },
+};
 
 export { api, tokenService };

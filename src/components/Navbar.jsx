@@ -1,11 +1,12 @@
-import { AppBar, Toolbar, Typography, Button, IconButton, Drawer, List, ListItem, ListItemText, useMediaQuery } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, IconButton, Drawer, List, ListItem, ListItemText, useMediaQuery, Box } from '@mui/material';
 import { useState, useEffect } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { authAPI } from '../api/apiService';
+import logo from '../assets/logo/logo.png';
 
-const Navbar = ({ isHR, setUser }) => {
+const Navbar = ({ isHR, setUser, setSidebarOpen }) => {
   const navigate = useNavigate();
   const isMobile = useMediaQuery('(max-width:600px)');
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -45,8 +46,15 @@ const Navbar = ({ isHR, setUser }) => {
           zIndex: (theme) => theme.zIndex.drawer + 1
         }}
       >
-        <Toolbar>
-          <Typography
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <img
+              src={logo}
+              alt="Thrive logo"
+              style={{ height: 40, marginRight: 12, cursor: 'pointer' }}
+              onClick={() => navigate('/')}
+            />
+            <Typography
             variant="h6"
             component="div"
             noWrap
@@ -54,6 +62,7 @@ const Navbar = ({ isHR, setUser }) => {
               flexGrow: 1,
               color: '#ffffff',
               cursor: 'pointer',
+              display: { xs: 'none', sm: 'block' },
               maxWidth: { xs: '60%', sm: '70%', md: '80%' },
               overflow: 'hidden',
               textOverflow: 'ellipsis'
@@ -62,24 +71,58 @@ const Navbar = ({ isHR, setUser }) => {
           >
             Thrive Holdings HR Intranet {isHR && '(Admin)'}
           </Typography>
-          {isMobile ? (
-            <IconButton
-              color="inherit"
-              edge="end"
-              onClick={() => setDrawerOpen(true)}
-              sx={{ ml: 1 }}
-            >
-              <MenuIcon />
-            </IconButton>
-          ) : (
-            <>
-              {isHR && (
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {isMobile ? (
+              <IconButton
+                color="inherit"
+                edge="end"
+                onClick={() => setDrawerOpen(prev => !prev)}
+              >
+                <MenuIcon />
+              </IconButton>
+            ) : (
+              <>
+                {isHR && (
+                  <Button
+                    onClick={() => navigate('/admin')}
+                    sx={{
+                      color: '#fff',
+                      backgroundColor: '#1976d2',
+                      '&:hover': { backgroundColor: '#115293' },
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      px: 2,
+                      py: 1,
+                      mr: 2
+                    }}
+                  >
+                    Admin Panel
+                  </Button>
+                )}
+                {isHR && (
+                  <Button
+                    onClick={() => navigate('/hr')}
+                    sx={{
+                      color: '#fff',
+                      backgroundColor: '#9c27b0',
+                      '&:hover': { backgroundColor: '#7b1fa2' },
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      px: 2,
+                      py: 1,
+                      mr: 2
+                    }}
+                  >
+                    HR Dashboard
+                  </Button>
+                )}
                 <Button
-                  onClick={() => navigate('/admin')}
+                  onClick={() => navigate('/leaves')}
                   sx={{
                     color: '#fff',
-                    backgroundColor: '#1976d2',
-                    '&:hover': { backgroundColor: '#115293' },
+                    backgroundColor: '#2e7d32',
+                    '&:hover': { backgroundColor: '#256322' },
                     fontWeight: 600,
                     borderRadius: 2,
                     px: 2,
@@ -87,74 +130,42 @@ const Navbar = ({ isHR, setUser }) => {
                     mr: 2
                   }}
                 >
-                  Admin Panel
+                  Leaves
                 </Button>
-              )}
-              {isHR && (
-                <Button
-                  onClick={() => navigate('/hr')}
-                  sx={{
-                    color: '#fff',
-                    backgroundColor: '#9c27b0',
-                    '&:hover': { backgroundColor: '#7b1fa2' },
+                {username && (
+                  <Button
+                    onClick={() => navigate('/profile')}
+                    sx={{
+                      color: '#fff',
+                      fontWeight: 600,
+                      mr: 2,
+                      display: { xs: 'none', sm: 'flex' },
+                      textTransform: 'none'
+                    }}
+                  >
+                    {username}
+                  </Button>
+                )}
+                {username && (
+                  <Typography variant="body2" sx={{ color: '#fff', mr: 1, fontWeight: 600, display: { xs: 'inline', sm: 'none' } }}>{username.charAt(0).toUpperCase()}</Typography>
+                )}
+                <Button 
+                  onClick={handleLogout}
+                  sx={{ 
+                    color: '#fff', 
+                    backgroundColor: '#ED1C24',
+                    '&:hover': { backgroundColor: '#c4181f' },
                     fontWeight: 600,
                     borderRadius: 2,
                     px: 2,
-                    py: 1,
-                    mr: 2
+                    py: 1
                   }}
                 >
-                  HR Dashboard
+                  Logout
                 </Button>
-              )}
-              <Button
-                onClick={() => navigate('/leaves')}
-                sx={{
-                  color: '#fff',
-                  backgroundColor: '#2e7d32',
-                  '&:hover': { backgroundColor: '#256322' },
-                  fontWeight: 600,
-                  borderRadius: 2,
-                  px: 2,
-                  py: 1,
-                  mr: 2
-                }}
-              >
-                Leaves
-              </Button>
-              {username && (
-                <Button
-                  onClick={() => navigate('/profile')}
-                  sx={{
-                    color: '#fff',
-                    fontWeight: 600,
-                    mr: 2,
-                    display: { xs: 'none', sm: 'flex' },
-                    textTransform: 'none'
-                  }}
-                >
-                  {username}
-                </Button>
-              )}
-              {username && (
-                <Typography variant="body2" sx={{ color: '#fff', mr: 1, fontWeight: 600, display: { xs: 'inline', sm: 'none' } }}>{username.charAt(0).toUpperCase()}</Typography>
-              )}
-              <Button 
-                onClick={handleLogout}
-                sx={{ 
-                  color: '#fff', 
-                  backgroundColor: '#ED1C24',
-                  '&:hover': { backgroundColor: '#c4181f' },
-                  fontWeight: 600,
-                  borderRadius: 2,
-                  px: 2,
-                  py: 1
-                }}
-              >
-                Logout
-              </Button>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -163,6 +174,7 @@ const Navbar = ({ isHR, setUser }) => {
         onClose={() => setDrawerOpen(false)}
         sx={{ '& .MuiDrawer-paper': { width: 220 } }}
       >
+        <Box sx={(theme) => theme.mixins.toolbar} />
         <List>
           {username && (
             <ListItem button onClick={() => { navigate('/profile'); setDrawerOpen(false); }}>

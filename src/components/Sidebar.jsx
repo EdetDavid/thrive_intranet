@@ -31,13 +31,12 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 
 const Sidebar = ({ onUploadTrigger, currentFolder, setCurrentFolder }) => {
   const navigate = useNavigate();
-  const { user } = useOutletContext(); // Get user from context
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, sidebarOpen, setSidebarOpen } = useOutletContext(); // Get user and sidebar control from Outlet context
   const isMobile = useMediaQuery('(max-width:900px)');
   const handleDrawerToggle = () => {
-    setMobileOpen((prev) => !prev);
+    if (typeof setSidebarOpen === 'function') setSidebarOpen(prev => !prev);
   };
 
   const handleNewClick = (event) => {
@@ -110,7 +109,7 @@ const Sidebar = ({ onUploadTrigger, currentFolder, setCurrentFolder }) => {
 
   return (
     <>
-      {isMobile && (
+      {isMobile && user?.isHR && (
         <Box sx={{ display: 'flex', alignItems: 'center', p: 1, background: '#f5f5f5' }}>
           <IconButton onClick={handleDrawerToggle} sx={{ color: '#181344' }}>
             <MenuIcon />
@@ -122,7 +121,7 @@ const Sidebar = ({ onUploadTrigger, currentFolder, setCurrentFolder }) => {
       )}
       <Drawer
         variant={isMobile ? 'temporary' : 'permanent'}
-        open={isMobile ? mobileOpen : true}
+        open={isMobile ? !!sidebarOpen : true}
         onClose={isMobile ? handleDrawerToggle : undefined}
         ModalProps={{ keepMounted: true }}
         sx={{
@@ -133,12 +132,13 @@ const Sidebar = ({ onUploadTrigger, currentFolder, setCurrentFolder }) => {
           '& .MuiDrawer-paper': {
             width: 240,
             boxSizing: 'border-box',
-            marginTop: isMobile ? 0 : '64px',
             backgroundColor: '#f5f5f5',
             zIndex: (theme) => theme.zIndex.appBar - 1,
           },
         }}
       >
+        {/* spacer to avoid AppBar overlap on desktop */}
+        {!isMobile && <Box sx={(theme) => theme.mixins.toolbar} />}
         <List>
           <ListItem
             button

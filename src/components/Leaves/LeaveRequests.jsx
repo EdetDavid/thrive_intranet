@@ -147,7 +147,7 @@ const LeaveRequests = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, mb: 2, gap: 1 }}>
         <Typography variant="h6">Leave Requests</Typography>
         {isHR && (
           <Button
@@ -155,6 +155,7 @@ const LeaveRequests = () => {
             color="primary"
             startIcon={<AddIcon />}
             onClick={() => setCreateLeaveOpen(true)}
+            sx={{ width: { xs: '100%', sm: 'auto' } }}
           >
             Create Staff Leave
           </Button>
@@ -164,7 +165,7 @@ const LeaveRequests = () => {
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: 2 }}>
         <Typography variant="subtitle1">Filter:</Typography>
-        <FormControl size="small" sx={{ minWidth: 160 }}>
+        <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 160 }, width: { xs: '100%', sm: 'auto' } }}>
           <InputLabel id="status-filter-label">Status</InputLabel>
           <Select labelId="status-filter-label" value={filterStatus} label="Status" onChange={(e) => setFilterStatus(e.target.value)}>
             <MenuItem value="all">All</MenuItem>
@@ -173,21 +174,23 @@ const LeaveRequests = () => {
             <MenuItem value="rejected">Rejected</MenuItem>
           </Select>
         </FormControl>
-  <Box sx={{ flex: 1 }} />
-  <Button variant="outlined" onClick={() => navigate('/submit-leave')}>Submit Leave</Button>
-  {isLineManager && <Button variant="contained" onClick={() => navigate('/my-team') } sx={{ ml: 1 }}>My Team</Button>}
-  {/* HR already has a link in the navbar — don't show duplicate button here */}
+        <Box sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }} />
+        <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' }, width: { xs: '100%', sm: 'auto' } }}>
+          <Button variant="outlined" fullWidth={isMobile} onClick={() => navigate('/submit-leave')}>Submit Leave</Button>
+          {isLineManager && <Button variant="contained" fullWidth={isMobile} onClick={() => navigate('/my-team') } sx={{ ml: { xs: 0, sm: 1 } }}>My Team</Button>}
+        </Box>
+        {/* HR already has a link in the navbar — don't show duplicate button here */}
       </Stack>
 
       <Grid container spacing={2}>
         {Object.values(grouped).map(({ user, requests: userRequests }) => (
           <Grid item xs={12} key={user?.id || user}>
-            <Paper sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-              <Avatar sx={{ bgcolor: 'primary.main' }}>{(user?.username || 'U').charAt(0).toUpperCase()}</Avatar>
-              <Box sx={{ flex: 1 }}>
+            <Paper sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: 'flex-start' }}>
+                <Avatar sx={{ bgcolor: 'primary.main', width: { xs: 56, sm: 40 }, height: { xs: 56, sm: 40 }, alignSelf: { xs: 'center', sm: 'flex-start' } }}>{(user?.username || 'U').charAt(0).toUpperCase()}</Avatar>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Box>
-                    <Typography sx={{ fontWeight: 700 }}>{user?.username}</Typography>
+                      <Typography sx={{ fontWeight: 700, wordBreak: 'break-word' }}>{user?.username}</Typography>
                     <Typography variant="body2" color="text.secondary">
                       {user?.first_name} {user?.last_name} • {user?.email}
                       {user?.manager && (
@@ -204,7 +207,7 @@ const LeaveRequests = () => {
                 {userRequests.map(r => (
                   <Paper key={r.id} sx={{ p: 1, mb: 1 }} variant="outlined">
                     <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center">
-                      <Box sx={{ mb: { xs: 1, sm: 0 } }}>
+                      <Box sx={{ mb: { xs: 1, sm: 0 }, minWidth: 0 }}>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           {r.leave_type} Leave Request
                         </Typography>
@@ -235,7 +238,7 @@ const LeaveRequests = () => {
                           Status: <strong>{r.status.toUpperCase()}</strong>
                         </Typography>
                       </Box>
-                      <Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         {canActOn(r) ? (
                           <>
                             <Tooltip title="Approve">

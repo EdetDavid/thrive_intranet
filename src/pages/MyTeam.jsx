@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Paper, Avatar, Stack, Button, Divider } from '@mui/material';
+import { Box, Typography, Paper, Avatar, Stack, Button } from '@mui/material';
 import { userAPI, authAPI } from '../api/apiService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -7,7 +7,6 @@ import { toast } from 'react-toastify';
 const MyTeam = () => {
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,7 +16,6 @@ const MyTeam = () => {
       try {
         const info = await authAPI.getUserInfo();
         if (!mounted) return;
-        setCurrentUser(info);
         // Request server-filtered list for the manager
         const resp = await userAPI.listByManager(info.id);
         const users = resp?.results || [];

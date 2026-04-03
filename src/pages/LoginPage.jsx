@@ -6,13 +6,11 @@ import {
   Button,
   Typography,
   Paper,
-  Avatar,
 } from "@mui/material";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { authAPI } from "../api/apiService";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Logo from "../assets/logo/logo.png";
 
 const LoginPage = () => {

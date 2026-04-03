@@ -8,7 +8,6 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval }
 
 const HRDashboard = () => {
   const [leaves, setLeaves] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [isHR, setIsHR] = useState(false);
   const [pwOpen, setPwOpen] = useState(false);
@@ -17,7 +16,6 @@ const HRDashboard = () => {
   const [pwSaving, setPwSaving] = useState(false);
 
   const fetchLeaves = async () => {
-    setLoading(true);
     try {
       const data = await leaveAPI.list();
       console.log('Leave API response:', data);  // Debug log
@@ -28,8 +26,6 @@ const HRDashboard = () => {
     } catch (err) {
       console.error('Failed to fetch leaves', err);
       setLeaves([]);
-    } finally {
-      setLoading(false);
     }
   };
 

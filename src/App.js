@@ -59,7 +59,7 @@ const App = () => {
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [navigate]);
+  }, [navigate, checkAuth]);
 
   if (loading) {
     return (

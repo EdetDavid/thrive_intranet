@@ -69,7 +69,7 @@ const Navbar = ({ isHR, setUser, setSidebarOpen }) => {
             }}
             onClick={() => navigate('/')}
           >
-            Thrive Holdings HR Intranet {isHR && '(Admin)'}
+            Thrive Intranet {isHR && '(Admin)'}
           </Typography>
           </div>
           <div style={{ display: 'flex', alignItems: 'center' }}>

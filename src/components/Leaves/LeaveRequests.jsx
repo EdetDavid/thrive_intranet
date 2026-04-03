@@ -131,14 +131,6 @@ const LeaveRequests = () => {
     return acc;
   }, {});
 
-  // build manager -> subordinates mapping (for HR view)
-  const managersMap = allUsers.reduce((acc, u) => {
-    const mId = u.manager?.id || null;
-    acc[mId] = acc[mId] || [];
-    acc[mId].push(u);
-    return acc;
-  }, {});
-
   const canActOn = (r) => {
     if (isHR) return true;
     if (isLineManager && currentUser) {

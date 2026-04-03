@@ -14,7 +14,7 @@ import {
 import { useOutletContext } from "react-router-dom";
 import FileBrowser from "../components/FileBrowser";
 import FolderBrowser from "../components/FolderBrowser";
-import Navbar from "../components/Navbar";
+// import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { fileAPI } from "../api/apiService";
 import { toast } from "react-toastify";

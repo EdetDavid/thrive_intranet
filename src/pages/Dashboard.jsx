@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Box,
@@ -34,7 +34,7 @@ const Dashboard = () => {
     status: "idle",
     error: "",
   });
-  const fetchData = async () => {
+  const fetchData = useCallback (async () => {
     try {
       setLoading(true);
       const [filesResponse, foldersResponse] = await Promise.all([
@@ -55,13 +55,13 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentFolder]);
 
   useEffect(() => {
     if (user.isAuthenticated) {
       fetchData();
     }
-  }, [user.isAuthenticated, currentFolder]);
+  }, [user.isAuthenticated, fetchData]);
 
   const handleUploadTrigger = (e, isFolder) => {
     if (e.target.files?.length > 0) {

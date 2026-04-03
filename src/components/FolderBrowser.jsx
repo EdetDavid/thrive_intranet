@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Grid,
   Card,
@@ -22,7 +22,7 @@ import { fileAPI } from "../api/apiService";
 import { toast } from "react-toastify";
 import NewFolderDialog from "./NewFolderDialog";
 import FolderMenu from "./FolderMenu";
-import EditIcon from '@mui/icons-material/Edit';
+// import EditIcon from '@mui/icons-material/Edit';
 import RenameFolderDialog from "./RenameFolderDialog";
 
 const FolderBrowser = ({ 
@@ -40,7 +40,7 @@ const FolderBrowser = ({
   const [openRenameDialog, setOpenRenameDialog] = useState(false);
   const [renameTarget, setRenameTarget] = useState(null);
 
-  const fetchFolders = async () => {
+  const fetchFolders = useCallback(async () => {
     try {
       setLoading(true);
       const foldersResponse = await fileAPI.listFolders(currentFolder?.id);
@@ -52,7 +52,7 @@ const FolderBrowser = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentFolder?.id]);
 
   const handleFolderClick = (folder) => {
     onFolderSelect(folder);
@@ -130,7 +130,7 @@ const FolderBrowser = ({
 
   useEffect(() => {
     fetchFolders();
-  }, [currentFolder]);
+  }, [fetchFolders, currentFolder]);
 
   useEffect(() => {
     const buildPath = (folder) => {

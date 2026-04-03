@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Typography, Button, Avatar, Grid, Paper, Stack, Chip, IconButton, Divider, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Tooltip, useMediaQuery } from '@mui/material';
 import { leaveAPI } from '../../api/apiService';
 import { useLocation } from 'react-router-dom';
@@ -26,7 +26,7 @@ const LeaveRequests = () => {
   const location = useLocation();
   const isMobile = useMediaQuery('(max-width:600px)'); 
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       // check for optional user query param to filter leaves
@@ -41,9 +41,11 @@ const LeaveRequests = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [location.search]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, [load]);
   useEffect(() => {
     let mounted = true;
     const loadUser = async () => {

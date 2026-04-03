@@ -35,7 +35,7 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { userAPI } from "../api/apiService";
-import Navbar from "../components/Navbar";
+// import Navbar from "../components/Navbar";
 import AddIcon from '@mui/icons-material/Add';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import DeleteIcon from '@mui/icons-material/Delete';

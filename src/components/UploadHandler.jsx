@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   Dialog,
   DialogTitle,
@@ -25,7 +25,7 @@ const UploadHandler = ({
   const [uploadStatus, setUploadStatus] = useState('idle'); // 'idle', 'uploading', 'success', 'error'
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleUpload = async () => {
+  const handleUpload = useCallback(async () => {
     if (!files || files.length === 0) return;
 
     setUploadStatus('uploading');
@@ -72,13 +72,13 @@ const UploadHandler = ({
       setErrorMessage(errorMsg);
       toast.error(errorMsg);
     }
-  };
+  }, [files, currentFolder, onUploadSuccess]);
 
   useEffect(() => {
     if (open && files) {
       handleUpload();
     }
-  }, [open]);
+  }, [files, handleUpload, open]);
 
   const handleClose = () => {
     if (uploadStatus === 'uploading') {
